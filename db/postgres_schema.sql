@@ -1,3 +1,6 @@
+-- dropdb products
+-- createdb products
+
 DROP TABLE IF EXISTS product;
 CREATE TABLE products (
   "id"            SERIAL       PRIMARY KEY,
@@ -5,7 +8,7 @@ CREATE TABLE products (
   "slogan"        varchar(100) NOT NULL,
   "description"   varchar(300) NOT NULL,
   "category"      varchar(50)  NOT NULL,
-  "default_price" varchar(50)  NOT NULL,
+  "default_price" varchar(50)  NOT NULL
 );
 
 DROP TABLE IF EXISTS features;
