@@ -35,12 +35,11 @@ let productsSchema = mongoose.Schema({
 
 let usersSchema = mongoose.Schema({
   id: { type: Number, unique: true, dropDups: true, required: true },
-  name: { type: String, required: true },
 });
 
 let cartsSchema = mongoose.Schema({
   id: { type: Number, unique: true, dropDups: true, required: true },
-  user_id: {type: Schema.Types.ObjectId, ref: 'usersSchema'},
+  user_id: {type: mongoose.Schema.Types.ObjectId, ref: 'usersSchema'},
   sku_id: { type: String, required: true },
   count: { type: Number, required: true },
 });
