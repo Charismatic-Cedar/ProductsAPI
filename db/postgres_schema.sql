@@ -52,4 +52,14 @@ CREATE TABLE skus (
   "size"          varchar(10) NOT NULL
 );
 
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+  "id"                SERIAL      PRIMARY KEY,
+);
 
+DROP TABLE IF EXISTS carts;
+CREATE TABLE carts (
+  "user_id"    INT         NOT NULL references users(id),
+  "sku_id"     varchar(50) NOT NULL,
+  "count"      INT         NOT NULL,
+);
