@@ -7,7 +7,7 @@ const relatedFile = './samples/related.csv';
 // const productFile = './SDCdata/product.csv';
 // const relatedFile = './SDCdata/related.csv';
 
-const conn = mongoose.connect('mongodb://localhost/products');
+mongoose.connect('mongodb://localhost/products', { useCreateIndex: true });
 
 let stylesSchema = mongoose.Schema({
   style_id: { type: Number, required: true },
@@ -27,7 +27,7 @@ let stylesSchema = mongoose.Schema({
 });
 
 let productsSchema = mongoose.Schema({
-  id: { type: Number, unique: true, dropDups: true, required: true },
+  id: { type: Number, unique: true, dropDups: true, required: true, index: true },
   name: { type: String, required: true },
   slogan: { type: String, required: true },
   description: { type: String, required: true },
@@ -52,21 +52,24 @@ let cartsSchema = mongoose.Schema({
   count: { type: Number, required: true },
 });
 
-let Products = mongoose.model('Products', productsSchema);
+const Products = mongoose.model('Products', productsSchema);
+Products.createIndexes();
+
 csv()
   .fromFile(productFile)
   .subscribe((json)=>{
     return new Promise((resolve,reject)=>{
-      // console.log(json);
-      let product = {
+      console.log(json);
+      let product = new Products ({
         id: json.id,
         name: json.name,
         slogan: json.slogan,
         description: json.description,
         category: json.category,
         default_price: json.default_price
-      };
-      Products.updateOne({id: json.id},product, {upsert: true, setDefaultsOnInsert: true})
+      });
+      // Products.updateOne({id: json.id},product, {upsert: true, setDefaultsOnInsert: true})
+      product.save()
               .then((q)=>{
                 // console.log(q);
                 resolve();
@@ -75,28 +78,31 @@ csv()
                 console.log('ERROR:',err);
                 reject();
               });
-    })})
-    .then((res) => {
-      csv()
-      .fromFile(relatedFile)
-      .subscribe((related)=>{
-        return new Promise((resolve,reject)=>{
-            Products.updateOne({id: related.current_product_id, related: {$ne: related.related_product_id}},{$push: {related: related.related_product_id}})
-            .then((q)=>{
-              // if (related.current_product_id === "1") {
-              //   console.log(related);
-              // }
-              // console.log(q);
-              resolve();
-            })
-            .catch((err)=>{
-              console.log('ERROR:',err);
-              reject();
-            });
+    })},
+      (err) => {
+        console.log(err);
+      },
+      () => {
+        csv()
+        .fromFile(relatedFile)
+        .subscribe((related)=>{
+          return new Promise((resolve,reject)=>{
+              Products.updateOne({id: related.current_product_id, related: {$ne: related.related_product_id}},{$push: {related: related.related_product_id}})
+              .then((q)=>{
+                resolve();
+              })
+              .catch((err)=>{
+                console.log('ERROR:',err);
+                reject();
+              });
+          })
         })
-      })
-      .then((res) => {
-        console.log('related load');
-      });
-    })
+        .then((res) => {
+          console.log('related load');
+          mongoose.connection.close();
+        });
+      }
+    );
+
+
 
