@@ -6,6 +6,7 @@ const productFile = './samples/product.csv';
 const relatedFile = './samples/related.csv';
 const featuresFile = './samples/features.csv';
 const photosFile = './samples/photos.csv';
+const stylesFile = './samples/styles.csv';
 // const productFile = './SDCdata/product.csv';
 // const relatedFile = './SDCdata/related.csv';
 
@@ -29,7 +30,7 @@ let stylesSchema = mongoose.Schema({
 });
 
 let productsSchema = mongoose.Schema({
-  id: { type: Number, unique: true, dropDups: true, required: true, index: true },
+  id: { type: Number, unique: true, required: true },
   name: { type: String, required: true },
   slogan: { type: String, required: true },
   description: { type: String, required: true },
@@ -53,6 +54,12 @@ let cartsSchema = mongoose.Schema({
   sku_id: { type: String, required: true },
   count: { type: Number, required: true },
 });
+
+const Products = mongoose.model('Products', productsSchema);
+Products.createIndexes();
+
+const Styles = mongoose.model('Styles', stylesSchema);
+
 // ==== ETL function start ================
 const loadFeatures = () => csv({
                               noheader:true,
@@ -63,7 +70,7 @@ const loadFeatures = () => csv({
                               console.log(feature);
                               return new Promise((resolve,reject)=>{
                                   Products.updateOne(
-                                    {id: feature[1]},
+                                    {id: feature[1], "features.feature":{$ne: feature[2]}},
                                     {
                                       $addToSet: {
                                         features:{
@@ -103,9 +110,38 @@ const loadRelateds = () => csv()
                               })
                             })
 
+const loadStyles = () => csv()
+                            .fromFile(stylesFile)
+                            .subscribe((styles)=>{
+                              return new Promise((resolve,reject)=>{
+                                Products.updateOne(
+                                  {
+                                    id: styles.productId, "styles.style_id": {$ne: styles.id}
+                                  },
+                                  {
+                                    $push: {
+                                      styles: new Styles({
+                                        style_id: styles.id,
+                                        name: styles.name,
+                                        original_price: styles.original_price,
+                                        sale_price: styles.sale_price,
+                                        "default?": styles.default_style === '1' ? true : false,
+                                      })
+                                    }
+                                  },
+                                  // { runValidators: true }
+                                )
+                                .then((q)=>{
+                                  resolve();
+                                })
+                                .catch((err)=>{
+                                  console.log('ERROR:',err);
+                                  reject();
+                                });
+                              })
+                            })
+
 // ==== ETL function end ================
-const Products = mongoose.model('Products', productsSchema);
-Products.createIndexes();
 
 csv()
   .fromFile(productFile)
@@ -124,11 +160,9 @@ csv()
       await product.save()
         .then((q)=>{
           // console.log(q);
-          return;
         })
         .catch((err)=>{
           // console.log('ERROR:',err);
-          return;
         });
     }
   })
@@ -141,6 +175,11 @@ csv()
     loadRelateds()
       .then((res) => {
         console.log('related load');
+        // mongoose.connection.close();
+      });
+    loadStyles()
+      .then((res) => {
+        console.log('styles load');
         // mongoose.connection.close();
       });
     }
