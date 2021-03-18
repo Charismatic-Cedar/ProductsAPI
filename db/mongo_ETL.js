@@ -57,9 +57,10 @@ Products.createIndexes();
 
 csv()
   .fromFile(productFile)
-  .subscribe((json)=>{
-    return new Promise((resolve,reject)=>{
-      console.log(json);
+  .then(async (jsons)=>{
+    for (let i = 0; i < jsons.length; i ++) {
+      const json = jsons[i];
+      // console.log(json);
       let product = new Products ({
         id: json.id,
         name: json.name,
@@ -68,26 +69,25 @@ csv()
         category: json.category,
         default_price: json.default_price
       });
-      // Products.updateOne({id: json.id},product, {upsert: true, setDefaultsOnInsert: true})
-      product.save()
-              .then((q)=>{
-                // console.log(q);
-                resolve();
-              })
-              .catch((err)=>{
-                console.log('ERROR:',err);
-                reject();
-              });
-    })},
-      (err) => {
-        console.log(err);
-      },
-      () => {
+      await product.save()
+        .then((q)=>{
+          // console.log(q);
+        })
+        .catch((err)=>{
+          // console.log('ERROR:',err);
+        });
+    }
+  })
+      .then(() => {
         csv()
         .fromFile(relatedFile)
         .subscribe((related)=>{
           return new Promise((resolve,reject)=>{
-              Products.updateOne({id: related.current_product_id, related: {$ne: related.related_product_id}},{$push: {related: related.related_product_id}})
+              Products.updateOne(
+                {id: related.current_product_id, related: {$ne: related.related_product_id}},
+                {$push: {related: related.related_product_id}},
+                // { runValidators: true }
+              )
               .then((q)=>{
                 resolve();
               })
