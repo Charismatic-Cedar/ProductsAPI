@@ -1,3 +1,4 @@
 db/SDCdata/
 db/samples/
+node_modules/
 *.DS_Store
