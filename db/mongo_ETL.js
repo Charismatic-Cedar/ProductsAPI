@@ -4,6 +4,8 @@ const fs = require('mz/fs');
 const csv = require('csvtojson')
 const productFile = './samples/product.csv';
 const relatedFile = './samples/related.csv';
+const featuresFile = './samples/features.csv';
+const photosFile = './samples/photos.csv';
 // const productFile = './SDCdata/product.csv';
 // const relatedFile = './SDCdata/related.csv';
 
@@ -51,7 +53,57 @@ let cartsSchema = mongoose.Schema({
   sku_id: { type: String, required: true },
   count: { type: Number, required: true },
 });
+// ==== ETL function start ================
+const loadFeatures = () => csv({
+                              noheader:true,
+                              output: 'csv'
+                            })
+                            .fromFile(featuresFile)
+                            .subscribe((feature)=>{
+                              console.log(feature);
+                              return new Promise((resolve,reject)=>{
+                                  Products.updateOne(
+                                    {id: feature[1]},
+                                    {
+                                      $addToSet: {
+                                        features:{
+                                          feature: feature[2],
+                                          value: feature[3]
+                                        }
+                                      }
+                                    },
+                                    // { runValidators: true }
+                                  )
+                                  .then((q)=>{
+                                    resolve();
+                                  })
+                                  .catch((err)=>{
+                                    console.log('ERROR:',err);
+                                    reject();
+                                  });
+                              })
+                            });
 
+const loadRelateds = () => csv()
+                            .fromFile(relatedFile)
+                            .subscribe((related)=>{
+                              return new Promise((resolve,reject)=>{
+                                  Products.updateOne(
+                                    {id: related.current_product_id, related: {$ne: related.related_product_id}},
+                                    {$push: {related: related.related_product_id}},
+                                    // { runValidators: true }
+                                  )
+                                  .then((q)=>{
+                                    resolve();
+                                  })
+                                  .catch((err)=>{
+                                    console.log('ERROR:',err);
+                                    reject();
+                                  });
+                              })
+                            })
+
+// ==== ETL function end ================
 const Products = mongoose.model('Products', productsSchema);
 Products.createIndexes();
 
@@ -72,37 +124,27 @@ csv()
       await product.save()
         .then((q)=>{
           // console.log(q);
+          return;
         })
         .catch((err)=>{
           // console.log('ERROR:',err);
+          return;
         });
     }
   })
-      .then(() => {
-        csv()
-        .fromFile(relatedFile)
-        .subscribe((related)=>{
-          return new Promise((resolve,reject)=>{
-              Products.updateOne(
-                {id: related.current_product_id, related: {$ne: related.related_product_id}},
-                {$push: {related: related.related_product_id}},
-                // { runValidators: true }
-              )
-              .then((q)=>{
-                resolve();
-              })
-              .catch((err)=>{
-                console.log('ERROR:',err);
-                reject();
-              });
-          })
-        })
-        .then((res) => {
-          console.log('related load');
-          mongoose.connection.close();
-        });
-      }
-    );
+  .then(() => {
+    loadFeatures()
+    .then((res) => {
+      console.log('features load');
+      // mongoose.connection.close();
+    });
+    loadRelateds()
+      .then((res) => {
+        console.log('related load');
+        // mongoose.connection.close();
+      });
+    }
+  );
 
 
 
