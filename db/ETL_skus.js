@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const fs = require('mz/fs');
 // const csv = require('fast-csv');
 const csv = require('csvtojson');
-const skusFile = './samples/skus.csv';
+// const skusFile = './samples/skus.csv';
+const skusFile = './SDCdata/skus.csv';
 
 mongoose.connect('mongodb://localhost/products', { useCreateIndex: true });
 

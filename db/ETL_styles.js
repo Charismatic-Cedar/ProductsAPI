@@ -2,13 +2,8 @@ const mongoose = require('mongoose');
 const fs = require('mz/fs');
 // const csv = require('fast-csv');
 const csv = require('csvtojson');
-const productFile = './samples/product.csv';
-const relatedFile = './samples/related.csv';
-const featuresFile = './samples/features.csv';
-const photosFile = './samples/photos.csv';
-const stylesFile = './samples/styles.csv';
-// const productFile = './SDCdata/product.csv';
-// const relatedFile = './SDCdata/related.csv';
+// const stylesFile = './samples/styles.csv';
+const stylesFile = './SDCdata/styles.csv';
 
 mongoose.connect('mongodb://localhost/products', { useCreateIndex: true });
 
