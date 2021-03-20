@@ -1,10 +1,9 @@
 const express = require('express');
+const productRoutes = require('./routes/products.js');
 
 const app = express();
 app.use(express.json());
 
-app.get('/', (req, res) => {
-
-});
+app.use('/products', productRoutes);
 
 app.listen(3000);
