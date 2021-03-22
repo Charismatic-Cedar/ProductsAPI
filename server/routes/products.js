@@ -34,7 +34,7 @@ router.get('/:product_id/related', (req, res) => {
       related
     } = product[0];
     res.status(200);
-    res.send(related);
+    res.send(related || []);
   });
 });
 
@@ -45,8 +45,8 @@ router.get('/:product_id/styles', (req, res) => {
       styles
     } = product[0];
     const result = {
-      product_id: id,
-      results: styles,
+      product_id: id.toString(),
+      results: styles || [],
     };
     res.status(200);
     res.send(result);
