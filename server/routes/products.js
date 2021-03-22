@@ -20,7 +20,7 @@ router.get('/:product_id', (req, res) => {
       description: description,
       category: category,
       default_price: default_price,
-      features: features
+      features: features || []
     }
     res.status(200);
     res.send(result);
