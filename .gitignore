@@ -1,4 +1,5 @@
 db/SDCdata/
 db/samples/
 node_modules/
+mongo_seed/
 *.DS_Store

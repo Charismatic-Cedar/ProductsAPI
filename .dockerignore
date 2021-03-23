@@ -1,0 +1,5 @@
+node_modules
+mongo_seed
+db/samples
+db/SDCdata
+npm-debug.log
