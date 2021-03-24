@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const conn = mongoose.connect('mongodb://mongodb/products', { useCreateIndex: true });
+const conn = mongoose.connect('mongodb://18.188.195.43:27017/products', { useCreateIndex: true });
 
 let stylesSchema = mongoose.Schema({
   style_id: { type: Number, required: true },
