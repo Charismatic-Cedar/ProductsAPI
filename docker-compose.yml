@@ -14,7 +14,7 @@ services:
     command:
       /mongo_seed/import.sh
 
-  products:
+  products1:
     build: ./
     depends_on:
       - 'mongo_seed'
@@ -22,3 +22,12 @@ services:
       - mongodb
     ports:
       - '3000:3000'
+
+  products2:
+    build: ./
+    depends_on:
+      - 'mongo_seed'
+    links:
+      - mongodb
+    ports:
+      - '3001:3000'
