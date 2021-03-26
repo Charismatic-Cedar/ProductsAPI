@@ -7,22 +7,6 @@ services:
     volumes:
       - /Users/jeffrey/Documents/HRSF133/SDC/data:/data/db
 
-  # mongodb1:
-  #   image: mongo:4.4.3
-  #   ports:
-  #     - 27018:27017
-  #   volumes:
-  #     - /Users/jeffrey/Documents/HRSF133/SDC/data:/data/db
-
-  # mongo_seed:
-  #   image: mongo:4.4.3
-  #   links:
-  #     - mongodb
-  #   volumes:
-  #     - ./mongo_seed:/mongo_seed
-  #   command:
-  #     /mongo_seed/import.sh
-
   products1:
     build: ./
     # image: productsapi_products1
