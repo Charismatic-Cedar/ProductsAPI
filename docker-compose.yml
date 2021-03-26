@@ -4,33 +4,46 @@ services:
     image: mongo:4.4.3
     ports:
       - 27017:27017
-
-  mongo_seed:
-    image: mongo:4.4.3
-    links:
-      - mongodb
     volumes:
-      - ./mongo_seed:/mongo_seed
-    command:
-      /mongo_seed/import.sh
+      - /Users/jeffrey/Documents/HRSF133/SDC/data:/data/db
+
+  # mongodb1:
+  #   image: mongo:4.4.3
+  #   ports:
+  #     - 27018:27017
+  #   volumes:
+  #     - /Users/jeffrey/Documents/HRSF133/SDC/data:/data/db
+
+  # mongo_seed:
+  #   image: mongo:4.4.3
+  #   links:
+  #     - mongodb
+  #   volumes:
+  #     - ./mongo_seed:/mongo_seed
+  #   command:
+  #     /mongo_seed/import.sh
 
   products1:
     build: ./
+    # image: productsapi_products1
     depends_on:
-      - 'mongo_seed'
+      - 'mongodb'
     links:
-      - mongodb
+      - mongodb:mongodb
     ports:
       - '3000:3000'
+    command: ["./wait-for-it.sh", "mongodb:27017", "--", "npm", "run", "server"]
 
   products2:
     build: ./
+    # image: productsapi_products2
     depends_on:
-      - 'mongo_seed'
+      - 'mongodb'
     links:
-      - mongodb
+      - mongodb:mongodb
     ports:
       - '3001:3000'
+    command: ["./wait-for-it.sh", "mongodb:27017", "--", "npm", "run", "server"]
 
   nginx:
     build: ./nginx
@@ -38,4 +51,4 @@ services:
       - products1
       - products2
     ports:
-      - '8080:8080'
+      - '8080:80'
