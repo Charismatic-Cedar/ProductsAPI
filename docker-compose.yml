@@ -45,10 +45,22 @@ services:
       - '3001:3000'
     command: ["./wait-for-it.sh", "mongodb:27017", "--", "npm", "run", "server"]
 
+  products3:
+    build: ./
+    # image: productsapi_products2
+    depends_on:
+      - 'mongodb'
+    links:
+      - mongodb:mongodb
+    ports:
+      - '3002:3000'
+    command: ["./wait-for-it.sh", "mongodb:27017", "--", "npm", "run", "server"]
+
   nginx:
     build: ./nginx
     depends_on:
       - products1
       - products2
+      - products3
     ports:
       - '8080:80'
